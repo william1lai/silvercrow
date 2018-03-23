@@ -1,14 +1,19 @@
 console.log('running silvercrow');
+var game = [];
+var info;
+var storage = new HugeStorageSync();
+
 init();
 logGame();
 
-
-var game = [];
-var info;
 function init() {
-  chrome.storage.sync.get(["gamelog"], function(items){
-    info = items["gamelog"];
-  });
+  // chrome.storage.sync.get(["gamelog"], function(items){
+  //   info = items["gamelog"];
+  // });
+  storage.get('gamelog', function(val) {
+    info = val;
+  });  
+  // info = "";
 }
 
 function logGame() {
@@ -67,8 +72,10 @@ function logSongInfo() {
     info += "<td>" + answer + "</td>";
   });
 
-  chrome.storage.sync.set({ "gamelog": info }, function(){
-  });
+  // chrome.storage.sync.set({ "gamelog": info }, function(){
+  // });
+  console.log("storing " + info);
+  storage.set('gamelog', info, function() {});
 
   $('#levelText').unbind().click(readLog);
   
@@ -96,3 +103,6 @@ function playersChanged(players) {
   }
   return true;
 }
+
+
+
