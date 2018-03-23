@@ -7,9 +7,6 @@ init();
 logGame();
 
 function init() {
-  // chrome.storage.sync.get(["gamelog"], function(items){
-  //   info = items["gamelog"];
-  // });
   storage.get('gamelog', function(val) {
     info = val;
   });  
@@ -72,15 +69,9 @@ function logSongInfo() {
     info += "<td>" + answer + "</td>";
   });
 
-  // chrome.storage.sync.set({ "gamelog": info }, function(){
-  // });
-  console.log("storing " + info);
   storage.set('gamelog', info, function() {});
 
   $('#levelText').unbind().click(readLog);
-  
-  // var amqlog = $('#amq-log').remove();
-  // $('#mainContainer').after(info + "</tr></table>");
 }
 
 // class=qpAvatarContainer id=qpAvatar-pikachudoraemon (for each user)
