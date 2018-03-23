@@ -6,3 +6,7 @@
 
 Known Issues
 1. Table not aligned well
+
+# How to install
+
+Refer to https://www.mattcutts.com/blog/how-to-install-a-chrome-extension-from-github/
