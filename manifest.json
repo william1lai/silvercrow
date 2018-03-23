@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+
+  "name": "Silver Crow AMQ Add-on",
+  "description": "This extension will log AMQ games",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png"
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://animemusicquiz.com/*"],
+      "css": ["styles.css"],
+      "js": ["jquery-3.3.1.min.js", "amq.js"]
+    }
+  ],
+  "web_accessible_resources": ["gamelog.html"]
+}
