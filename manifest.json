@@ -19,5 +19,5 @@
       "js": ["jquery-3.3.1.min.js", "amq.js"]
     }
   ],
-  "web_accessible_resources": ["gamelog.html"]
+  "web_accessible_resources": ["gamelog.html", "cleargamelog.html"]
 }

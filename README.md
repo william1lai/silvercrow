@@ -10,3 +10,9 @@ Known Issues
 # How to install
 
 Refer to https://www.mattcutts.com/blog/how-to-install-a-chrome-extension-from-github/
+
+# Ghetto Mechanics
+
+To open the game log, tap the level button in the bottom middle of any game (whether you're a player or spectator). If it doesn't load, you need to wait for the next song to be revealed.
+
+To clear the game log, first load the game log. Then close any open AMQ tabs. Finally, change the strange URL for the game log by appending a "clear" to the "gamelog.html", so that it reads "cleargamelog.html". There should be a message indicating the log has been cleared.

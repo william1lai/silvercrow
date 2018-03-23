@@ -6,10 +6,13 @@ init();
 logGame();
 
 function init() {
+  fetchLogs();
+}
+
+function fetchLogs() {
   chrome.storage.local.get(["gamelog"], function(items){
     info = items["gamelog"];
-  });    
-  // info = "";
+  });
 }
 
 function logGame() {
