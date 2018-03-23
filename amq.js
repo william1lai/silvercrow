@@ -7,9 +7,9 @@ init();
 logGame();
 
 function init() {
-  storage.get('gamelog', function(val) {
-    info = val;
-  });  
+  chrome.storage.local.get(["gamelog"], function(items){
+    info = items["gamelog"];
+  });    
   // info = "";
 }
 
@@ -50,6 +50,7 @@ function logSongInfo() {
     <td><b>#</b></td> \
     <td><b>Anime</b></td> \
     <td><b>Song</b></td> \
+    <td><b>Artist</b></td> \
     <td><b>Type</b></td>";
     
     players.each(function(index, player) {
@@ -63,13 +64,16 @@ function logSongInfo() {
   <td>" + songNum + "</td> \
   <td>" + animeTitle + "</td> \
   <td>" + songTitle + "</td> \
+  <td>" + songArtist + "</td> \
   <td>" + songType + "</td>";
   players.each(function(index, player) {
     var answer = $(player).find('.qpAvatarAnswer').text();
     info += "<td>" + answer + "</td>";
   });
 
-  storage.set('gamelog', info, function() {});
+  // storage.set('gamelog', info, function() {});
+  chrome.storage.local.set({ "gamelog": info }, function(){
+  })
 
   $('#levelText').unbind().click(readLog);
 }
