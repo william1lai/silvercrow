@@ -2,11 +2,15 @@ console.log('running silvercrow');
 init();
 logGame();
 
-function init() {
-}
 
 var game = [];
-var info = "";
+var info;
+function init() {
+  chrome.storage.sync.get(["gamelog"], function(items){
+    info = items["gamelog"];
+  });
+}
+
 function logGame() {
   var target = document.querySelector('div#qpAnimeName');
   var observer = new MutationObserver(function(mutations) {
