@@ -31,8 +31,14 @@ function logSongInfo() {
   var players = $('.qpAvatarContainer');
   var nplayers = players.length;
 
-  if (info === "") {
-    info = "<div id='amq-log'> \
+  var gameplayers = [];
+  players.each(function(index, player) {
+    var name = $(player).attr('id').split('-')[1];
+    gameplayers.push(player);
+  });
+  if (playersChanged(gameplayers)) {
+    game = gameplayers;
+    info += "<div id='amq-log'> \
     <table> \
     <tr> \
     <td><b>#</b></td> \
@@ -43,7 +49,7 @@ function logSongInfo() {
     players.each(function(index, player) {
       var name = $(player).attr('id').split('-')[1];
       info += "<td><b>" + name + "</b></td>";
-    });
+    })
     info += "</tr>";  
   }
 
@@ -73,4 +79,16 @@ function logSongInfo() {
 function readLog() {
   console.log('opening ' + chrome.runtime.getURL('gamelog.html'));
   window.open(chrome.runtime.getURL('gamelog.html'), '_blank');
+}
+
+function playersChanged(players) {
+  if (game.length == players.length) {
+    for (var i = 0; i < players.length; i++) {
+      if (game[i] !== players[i]) {
+        return true;
+      }
+    }
+    return false;
+  }
+  return true;
 }
