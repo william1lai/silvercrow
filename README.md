@@ -5,4 +5,4 @@
 2. Keep in-game stats on songs that appear and how often correct
 
 Known Issues
-1. Does not create new table upon entering different game.
+1. Table not aligned well
