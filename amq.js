@@ -1,7 +1,6 @@
 console.log('running silvercrow');
 var game = [];
 var info;
-var storage = new HugeStorageSync();
 
 init();
 logGame();
@@ -71,7 +70,6 @@ function logSongInfo() {
     info += "<td>" + answer + "</td>";
   });
 
-  // storage.set('gamelog', info, function() {});
   chrome.storage.local.set({ "gamelog": info }, function(){
   })
 
