@@ -6,6 +6,7 @@
 
 Known Issues
 1. Table not aligned well
+2. Seems that data doesn't persist on reload (i.e. only lasts one session).
 
 # How to install
 
