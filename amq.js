@@ -54,6 +54,8 @@ function logGame() {
   var target = document.querySelector('div#qpAnimeName');
   var observer = new MutationObserver(function(mutations) {
       logSongInfo();
+      $('#qpVoteSkip').click();
+      $('#qpVideosUserHidden').click();
   });
 
   var config = {
