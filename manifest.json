@@ -6,12 +6,21 @@
   "version": "1.0",
 
   "browser_action": {
-    "default_icon": "icon.png"
+    "default_icon": "icon.png",
+    "default_popup": "gamelog.html",
+    "default_title": "AMQ Logger"
   },
+
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+
   "permissions": [
     "activeTab",
     "storage"
   ],
+
   "content_scripts": [
     {
       "matches": ["https://animemusicquiz.com/*"],
@@ -19,5 +28,6 @@
       "js": ["jquery-3.3.1.min.js", "amq.js"]
     }
   ],
-  "web_accessible_resources": ["gamelog.html", "cleargamelog.html"]
+
+  "web_accessible_resources": ["gamelog.html"]
 }
