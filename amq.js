@@ -185,7 +185,8 @@ function logToDB(animeTitle, songTitle, songArtist, songType, players, nplayers)
     // Inject historic score for song above each player's avatar
     for (var j = 0; j < players.length; j++) {
       console.log(names[j] + ': ' + correct[j] + ' / ' + total[j]);
-      $(players[j]).prepend("<div id=accel>" + correct[j] + ' / ' + total[j] + "</div>");
+      $(players[j]).find('.accel').remove();
+      $(players[j]).append("<div class=accel>" + correct[j] + ' / ' + total[j] + "</div>");
     }
   };  
 }
