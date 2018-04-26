@@ -55,7 +55,7 @@ function logGame() {
   var observer = new MutationObserver(function(mutations) {
       logSongInfo();
       $('#qpVoteSkip').click();
-      $('#qpVideosUserHidden').click();
+      //$('#qpVideosUserHidden').click();
   });
 
   var config = {
