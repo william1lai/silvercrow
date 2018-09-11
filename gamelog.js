@@ -7,5 +7,6 @@ function readLog() {
   chrome.storage.local.get(["gamelog"], function(items){
     $('#loghead').after(items["gamelog"]);
   });
-    
 }
+
+
