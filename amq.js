@@ -116,10 +116,8 @@ function logSongInfo() {
       inMalList.push(username);
     }
   });
-  console.log("answers " + JSON.stringify(answers));
 
   var songRecord = new SongRecord(song, songNum, answers, correct, inMalList);
-  console.log(songRecord.toJSON());
   var songTransaction = db.transaction(['songRecords'], 'readwrite');
   var songStore = songTransaction.objectStore('songRecords');
   var songRequest = songStore.add(songRecord.toJSON());
@@ -131,7 +129,6 @@ function logSongInfo() {
   };
 
   game.addSong(songRecord);
-  console.log(game.toJSON());
   var gameTransaction = db.transaction(['gameRecords'], 'readwrite');
   var gameStore = gameTransaction.objectStore('gameRecords');
   var gameRequest = gameStore.get(game.timestamp)
@@ -146,7 +143,6 @@ function logSongInfo() {
       data = Game.fromJSON(data);
       data.songs.push(songRecord);
     }
-    console.log('current game record: ' + data.toJSON());
 
     var updateRequest = gameStore.put(data.toJSON(), data.id);
     updateRequest.onerror = function(e) {
@@ -171,16 +167,79 @@ function readLog() {
     console.log("Could not generate game log.")
   }
   request.onsuccess = function(event) {
-    console.log(request.result);
     request.result.forEach(function(gameJSON) {
       var gr = Game.fromJSON(gameJSON);
-      console.log("serialized game: " + gr.toJSON());
       var grHTML = gr.toHTML();
-      console.log(grHTML)
       logHTML += grHTML + "<br><br>"
     });
 
-    chrome.storage.local.set({ "gamelog": logHTML }, function() {
+    // perform analysis on the data
+    var allPlayers = [];
+    var playerIncorrectList = {};
+    var playerCorrectList = {};
+    var playerIncorrectNoList = {};
+    var playerCorrectNoList = {};
+    request.result.forEach(function(gameJSON) {
+      var gr = Game.fromJSON(gameJSON);
+      var songRecords = gr.songs;
+      for (var i = 0; i < songRecords.length; i++) {
+        var songRecord = songRecords[i];
+        for (var username in songRecord.answers) {
+          var correct = false;
+          var fromList = false;
+          if (songRecord.correct.some(e => e.username === username)) {
+            correct = true;
+          }
+          if (songRecord.fromPlayer.some(e => e.username === username)) {
+            fromList = true;
+          }
+
+          if (!allPlayers.includes(username)) {
+            allPlayers.push(username);
+            playerCorrectList[username] = 0;
+            playerCorrectNoList[username] = 0;
+            playerIncorrectList[username] = 0;
+            playerIncorrectNoList[username] = 0;
+          }
+          if (correct && fromList) {
+            playerCorrectList[username] += 1;
+          } else if (correct) {
+            playerCorrectNoList[username] += 1;
+          } else if (fromList) {
+            playerIncorrectList[username] += 1;
+          } else {
+            playerIncorrectNoList[username] += 1;
+          }
+        }
+      }
+    });
+
+    var statsHTML = "<h2>Statistical Analysis</h2>"
+      + "<table width=50%><tr>"
+      + "<td width=60%><b>Username<b></td>"
+      + "<td width=20%><b>Overall<b></td>"
+      + "<td width=20%><b>From MAL<b></td>"
+      + "</tr>";
+    for (var i = 0; i < allPlayers.length; i++) {
+      var username = allPlayers[i];
+      var correctlist = parseInt(playerCorrectList[username]);
+      var correctnolist = parseInt(playerCorrectNoList[username]);
+      var incorrectlist = parseInt(playerIncorrectList[username]);
+      var incorrectnolist = parseInt(playerIncorrectNoList[username]);
+      var correct = correctlist + correctnolist;
+      var incorrect = incorrectlist + incorrectnolist;
+      var list = correctlist + incorrectlist;
+      var nolist = correctnolist + incorrectnolist;
+      var total = correct + incorrect;
+
+      playerHTML = "<tr><td width=60%>" + username + "</td><td width=20%>" + correct + " / " + total
+        + "</td><td width=20%>" + correctlist + " / " + list
+        + "</td></tr>";
+        statsHTML += playerHTML;
+    }
+    statsHTML += "</table><br><br>";
+
+    chrome.storage.local.set({ "gamelog": statsHTML + logHTML }, function() {
       console.log('opening ' + chrome.runtime.getURL('gamelog.html'));
       window.open(chrome.runtime.getURL('gamelog.html'), '_blank');
     });
@@ -208,10 +267,8 @@ function updateStatOverlay(animeTitle, songTitle, songArtist, songType, players,
     request.result.forEach(function(songRecord) {
       var sr = SongRecord.fromJSON(songRecord);
       var songOfInterest = new Song(songTitle, animeTitle, songArtist, songType);
-      // console.log("rec " + sr.song.toJSON());
       if (Song.equals(sr.song, songOfInterest)) {
         for (var i = 0; i < players.length; i++) {
-          console.log(sr.answers);
           if (names[i] in sr.answers) {
             total[i] += 1;
             if (sr.correct.includes(names[i])) {
@@ -224,7 +281,6 @@ function updateStatOverlay(animeTitle, songTitle, songArtist, songType, players,
 
     // Inject historic score for song above each player's avatar
     for (var j = 0; j < players.length; j++) {
-      console.log(names[j] + ': ' + correct[j] + ' / ' + total[j]);
       $(players[j]).find('.accel').remove();
       $(players[j]).append("<div class=accel>" + correct[j] + ' / ' + total[j] + "</div>");
     }

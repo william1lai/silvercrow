@@ -6,7 +6,6 @@
 function Player(username) {
   this.username = username;
 }
-// Player.prototype.username = function() { return this.username; }
 
 /*
  * Song:
@@ -32,7 +31,7 @@ Song.equals = function(song1, song2) {
  * SongRecord:
  * - song: Song
  * - songNumber: Int
- * - answers: {Player: answer}
+ * - answers: {Player.username: answer} - since JS dictionary keys have to be strings
  * - correct: [Player]
  * - fromPlayer: [Player]
  */
@@ -56,15 +55,13 @@ function Game(songs, players, timestamp) {
   this.timestamp = timestamp;
   this.id = timestamp.toString()
 }
-
 Game.prototype.addSong = function(song) {
   this.songs.push(song);
 }
 
 
-
 /*
- * JSON serializers and deserializers
+ * JSON/HTML serializers and deserializers
  */
 
 Player.prototype.toJSON = function() {
@@ -82,6 +79,12 @@ Song.prototype.toJSON = function() {
     type: this.type
   });
 }
+Song.prototype.toHTML = function() {
+  return "Anime: " + this.animeTitle
+    + ", Song: " + this.songTitle
+    + ", Artist: " + this.artist
+    + ", Type: " + this.type;
+}
 Song.fromJSON = function(json) {
   var data = JSON.parse(json);
   return new Song(data.songTitle, data.animeTitle, data.artist, data.type);
@@ -96,9 +99,46 @@ SongRecord.prototype.toJSON = function() {
     fromPlayer: this.fromPlayer
   });
 }
+SongRecord.prototype.toHTML = function() {
+  var songHTML = this.song.toHTML();
+  var answersHTML = "";
+  for (var key in this.answers) {
+    var player = Player.fromJSON(key);
+    var entryHTML = "<table width=50%><tr><td width=90%>"
+      + key + ": " + this.answers[key] + "</td>"
+    if (this.correct.some(e => e.username === player.username)) {
+      entryHTML += "<td width=5%>O</td>";
+    } else {
+      entryHTML += "<td width=5%>X<?td>";
+    }
+    if (this.fromPlayer.some(e => e.username === player.username)) {
+      entryHTML += "<td width=5%>(MAL)</td>";
+    } else {
+      entryHTML += "<td width=5%> </td>";
+    }
+    answersHTML += entryHTML + "</tr></table><br>";
+  }
+  return "<font size=\"3\">(" + this.songNumber + ") "
+    + songHTML + "</font><br>"
+    + answersHTML + "<br>";
+}
 SongRecord.fromJSON = function(json) {
   var data = JSON.parse(json);
-  return new SongRecord(Song.fromJSON(data.song), data.songNumber, data.answers, data.correct, Player.fromJSON(data.fromPlayer));
+  var correct = data.correct;
+  var deserCorrect = [];
+  if (correct) {
+    correct.forEach(function(player) {
+      deserCorrect.push(Player.fromJSON(player));
+    });
+  }
+  var fromPlayer = data.fromPlayer;
+  var deserFromPlayer = [];
+  if (fromPlayer) {
+    fromPlayer.forEach(function(player) {
+      deserFromPlayer.push(Player.fromJSON(player));
+    });
+  }
+  return new SongRecord(Song.fromJSON(data.song), data.songNumber, data.answers, deserCorrect, deserFromPlayer);
 }
 
 Game.prototype.toJSON = function() {
@@ -109,7 +149,23 @@ Game.prototype.toJSON = function() {
   });
 }
 Game.prototype.toHTML = function() {
-  return "<table><tr><td>" + this.toJSON() + "</td></tr></table>";
+  var playersJSON = this.players[0].toJSON();
+  for (var i = 1; i < this.players.length; i++) {
+    playersJSON += ", " + this.players[i].toJSON();
+  }
+  var timestampJSON = new Date(this.timestamp).toLocaleString();
+  var gameDescription = "Time: " + timestampJSON + ", Players: " + playersJSON
+
+  var songsHTML = ""
+  for (var i = 0; i < this.songs.length; i++) {
+    songsHTML += this.songs[i].toHTML();
+  }
+
+  var html = "<button class=\"gameTab\">" + gameDescription + "</button>"
+    + "<div class=\"panel\">"
+    + "<p>" + songsHTML + "</p>"
+    + "</div>"
+  return html;
 }
 Game.fromJSON = function(json) {
   var data = JSON.parse(json);
@@ -129,15 +185,3 @@ Game.fromJSON = function(json) {
   }
   return new Game(deserSongs, deserPlayers, data.timestamp);
 }
-
-
-/*
- * HTML serializers (TODO)
- */
-
-
-// var sr = new SongRecord(1, "test song", 1, ["a", "b", "c"], ["p1", "p3"], ["p1", "p2"]);
-// var g = new Game(1, sr, ["p1", "p2", "p3"], "timestamp");
-// console.log(g.toJSON());
-// console.log(sr.toJSON());
-// console.log(sr);
