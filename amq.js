@@ -268,10 +268,11 @@ function updateStatOverlay(animeTitle, songTitle, songArtist, songType, players,
       var sr = SongRecord.fromJSON(songRecord);
       var songOfInterest = new Song(songTitle, animeTitle, songArtist, songType);
       if (Song.equals(sr.song, songOfInterest)) {
+        console.log("SR: " + songRecord);
         for (var i = 0; i < players.length; i++) {
           if (names[i] in sr.answers) {
             total[i] += 1;
-            if (sr.correct.includes(names[i])) {
+            if (sr.correct.some(e => e.username === names[i])) {
               correct[i] += 1;
             }
           }
