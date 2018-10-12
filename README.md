@@ -1,10 +1,11 @@
 # silvercrow
 
 1. Provide game log for AMQ
-  i. Barebones functionality. Tapping the player level will open a page with the log.
+  i. Tapping the player level will open a page with the log.
+  ii. Shows each player's correct/total ratio for OP/ED and Inserts, as well as when those are from or not from their list.
+  iii. Click-expandable game logs sorted in reverse-chronological order.
 2. Keep in-game stats on songs that appear and how often correct
   i. Shows below each player's avatar after each song
-3. Auto-skip and Auto-hide after each song.
 
 Known Issues
 1. Stats persist into next song
