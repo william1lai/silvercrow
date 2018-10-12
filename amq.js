@@ -170,7 +170,7 @@ function readLog() {
     request.result.forEach(function(gameJSON) {
       var gr = Game.fromJSON(gameJSON);
       var grHTML = gr.toHTML();
-      logHTML += grHTML + "<br><br>"
+      logHTML = grHTML + "<br><br>" + logHTML;
     });
 
     // perform analysis on the data
@@ -184,6 +184,10 @@ function readLog() {
       var songRecords = gr.songs;
       for (var i = 0; i < songRecords.length; i++) {
         var songRecord = songRecords[i];
+        var isInsert = 0;
+        if (songRecord.song.type == "Insert Song") {
+          isInsert = 1;
+        }
         for (var username in songRecord.answers) {
           var correct = false;
           var fromList = false;
@@ -196,45 +200,60 @@ function readLog() {
 
           if (!allPlayers.includes(username)) {
             allPlayers.push(username);
-            playerCorrectList[username] = 0;
-            playerCorrectNoList[username] = 0;
-            playerIncorrectList[username] = 0;
-            playerIncorrectNoList[username] = 0;
+            playerCorrectList[username] = [0, 0];
+            playerCorrectNoList[username] = [0, 0];
+            playerIncorrectList[username] = [0, 0];
+            playerIncorrectNoList[username] = [0, 0];
           }
           if (correct && fromList) {
-            playerCorrectList[username] += 1;
+            playerCorrectList[username][isInsert] += 1;
           } else if (correct) {
-            playerCorrectNoList[username] += 1;
+            playerCorrectNoList[username][isInsert] += 1;
           } else if (fromList) {
-            playerIncorrectList[username] += 1;
+            playerIncorrectList[username][isInsert] += 1;
           } else {
-            playerIncorrectNoList[username] += 1;
+            playerIncorrectNoList[username][isInsert] += 1;
           }
         }
       }
     });
 
     var statsHTML = "<h2>Statistical Analysis</h2>"
-      + "<table width=50%><tr>"
-      + "<td width=60%><b>Username<b></td>"
-      + "<td width=20%><b>Overall<b></td>"
-      + "<td width=20%><b>From MAL<b></td>"
+      + "<table width=80%><tr>"
+      + "<td width=40%><b>Username<b></td>"
+      + "<td width=15%><b>OP/ED<b></td>"
+      + "<td width=15%><b>OP/ED From MAL<b></td>"
+      + "<td width=15%><b>Inserts<b></td>"
+      + "<td width=15%><b>Inserts From MAL<b></td>"
       + "</tr>";
     for (var i = 0; i < allPlayers.length; i++) {
       var username = allPlayers[i];
-      var correctlist = parseInt(playerCorrectList[username]);
-      var correctnolist = parseInt(playerCorrectNoList[username]);
-      var incorrectlist = parseInt(playerIncorrectList[username]);
-      var incorrectnolist = parseInt(playerIncorrectNoList[username]);
+      var correctlist = parseInt(playerCorrectList[username][0]);
+      var correctnolist = parseInt(playerCorrectNoList[username][0]);
+      var incorrectlist = parseInt(playerIncorrectList[username][0]);
+      var incorrectnolist = parseInt(playerIncorrectNoList[username][0]);
       var correct = correctlist + correctnolist;
       var incorrect = incorrectlist + incorrectnolist;
       var list = correctlist + incorrectlist;
       var nolist = correctnolist + incorrectnolist;
       var total = correct + incorrect;
 
-      playerHTML = "<tr><td width=60%>" + username + "</td><td width=20%>" + correct + " / " + total
-        + "</td><td width=20%>" + correctlist + " / " + list
-        + "</td></tr>";
+      var correctlistInsert = parseInt(playerCorrectList[username][1]);
+      var correctnolistInsert = parseInt(playerCorrectNoList[username][1]);
+      var incorrectlistInsert = parseInt(playerIncorrectList[username][1]);
+      var incorrectnolistInsert = parseInt(playerIncorrectNoList[username][1]);
+      var correctInsert = correctlistInsert + correctnolistInsert;
+      var incorrectInsert = incorrectlistInsert + incorrectnolistInsert;
+      var listInsert = correctlistInsert + incorrectlistInsert;
+      var nolistInsert = correctnolistInsert + incorrectnolistInsert;
+      var totalInsert = correctInsert + incorrectInsert;
+
+      playerHTML = "<tr><td width=40%>" + username + "</td>"
+        + "<td width=15%>" + correct + " / " + total + " (" + makePercent(correct, total) + ")</td>"
+        + "<td width=15%>" + correctlist + " / " + list + " (" + makePercent(correctlist, list) + ")</td>"
+        + "<td width=15%>" + correctInsert + " / " + totalInsert + " (" + makePercent(correctInsert, totalInsert) + ")</td>"
+        + "<td width=15%>" + correctlistInsert + " / " + listInsert + " (" + makePercent(correctlistInsert, listInsert) + ")</td>"
+        + "</tr>";
         statsHTML += playerHTML;
     }
     statsHTML += "</table><br><br>";
@@ -244,6 +263,13 @@ function readLog() {
       window.open(chrome.runtime.getURL('gamelog.html'), '_blank');
     });
   }
+}
+
+function makePercent(numerator, denominator) {
+  if (denominator == 0) {
+    return "N/A";
+  }
+  return ((numerator/denominator)*100).toFixed(1) + "%";
 }
 
 function updateStatOverlay(animeTitle, songTitle, songArtist, songType, players, nplayers) {
@@ -268,7 +294,6 @@ function updateStatOverlay(animeTitle, songTitle, songArtist, songType, players,
       var sr = SongRecord.fromJSON(songRecord);
       var songOfInterest = new Song(songTitle, animeTitle, songArtist, songType);
       if (Song.equals(sr.song, songOfInterest)) {
-        console.log("SR: " + songRecord);
         for (var i = 0; i < players.length; i++) {
           if (names[i] in sr.answers) {
             total[i] += 1;
