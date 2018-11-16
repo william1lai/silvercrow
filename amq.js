@@ -94,7 +94,6 @@ function logSongInfo() {
 
   if (!game || isNewGame(gameplayers, songNum)) {
     // create new Game
-    console.log('New game created, ' + !game + ' ' + isNewGame(gameplayers, songNum));
     game = new Game([], gameplayers, Date.now());
   }
   currentPlayers = gameplayers;
@@ -167,23 +166,47 @@ function readLog() {
     console.log("Could not generate game log.")
   }
   request.onsuccess = function(event) {
+    var GAMES_LOGGED_LIMIT = 30;
+    var gamesLogged = 0;
     request.result.forEach(function(gameJSON) {
       var gr = Game.fromJSON(gameJSON);
       var grHTML = gr.toHTML();
-      logHTML = grHTML + "<br><br>" + logHTML;
+      if (gamesLogged < GAMES_LOGGED_LIMIT) {
+        logHTML = grHTML + "<br><br>" + logHTML;
+        gamesLogged += 1;
+      }
     });
 
     // perform analysis on the data
+
+    // How players do with certain songs in/not in their list
     var allPlayers = [];
     var playerIncorrectList = {};
     var playerCorrectList = {};
     var playerIncorrectNoList = {};
     var playerCorrectNoList = {};
+
+    // Which songs have shown up the most in the last 30 days
+    var metaSongsMap = {};
+
     request.result.forEach(function(gameJSON) {
       var gr = Game.fromJSON(gameJSON);
+      var gameTime = new Date(gr.timestamp);
+      var timeDiff = Date.now() - gameTime.getTime();
+      var THIRTY_DAYS_IN_SECS = 60 * 60 * 24 * 30;
+      var playedInLast30Days = timeDiff > THIRTY_DAYS_IN_SECS;
+
       var songRecords = gr.songs;
       for (var i = 0; i < songRecords.length; i++) {
         var songRecord = songRecords[i];
+
+        var songKey = songRecord.song.songTitle + "(" + songRecord.song.animeTitle + ")";
+        if (!(songKey in metaSongsMap)) {
+          metaSongsMap[songKey] = 1;
+        } else {
+          metaSongsMap[songKey] += 1;
+        }
+
         var isInsert = 0;
         if (songRecord.song.type == "Insert Song") {
           isInsert = 1;
@@ -254,11 +277,35 @@ function readLog() {
         + "<td width=15%>" + correctInsert + " / " + totalInsert + " (" + makePercent(correctInsert, totalInsert) + ")</td>"
         + "<td width=15%>" + correctlistInsert + " / " + listInsert + " (" + makePercent(correctlistInsert, listInsert) + ")</td>"
         + "</tr>";
-        statsHTML += playerHTML;
+      statsHTML += playerHTML;
     }
     statsHTML += "</table><br><br>";
 
-    chrome.storage.local.set({ "gamelog": statsHTML + logHTML }, function() {
+    // add meta songs list
+    var sortedMetaSongs = Object.keys(metaSongsMap).sort(
+      function(a, b) {
+        return metaSongsMap[b] - metaSongsMap[a];
+      }
+    )
+
+    var metaHTML = "<h2>Meta Songs (last 30 days)</h2>"
+    + "<table width=80%><tr>"
+    + "<td width=20%><b>Count<b></td>"
+    + "<td width=80%><b>Song<b></td>"
+    + "</tr>";
+
+    var MINIMUM_META_SONG_COUNT = 3;
+    for (var i = 0; i < sortedMetaSongs.length; i++) {
+      if (metaSongsMap[sortedMetaSongs[i]] >= MINIMUM_META_SONG_COUNT) {
+        metaHTML += "<tr>"
+        + "<td width=20%>" + metaSongsMap[sortedMetaSongs[i]] + "</td>"
+        + "<td width=80%>" + sortedMetaSongs[i] + "</td>"
+        + "</tr>";
+      }
+    }
+    metaHTML += "</table><br><br>";
+
+    chrome.storage.local.set({ "gamelog": statsHTML + metaHTML + logHTML }, function() {
       console.log('opening ' + chrome.runtime.getURL('gamelog.html'));
       window.open(chrome.runtime.getURL('gamelog.html'), '_blank');
     });
