@@ -204,7 +204,7 @@ function readLog() {
       for (var i = 0; i < songRecords.length; i++) {
         var songRecord = songRecords[i];
 
-        var songKey = songRecord.song.songTitle + "(" + songRecord.song.animeTitle + ")";
+        var songKey = songRecord.song.songTitle + " (" + songRecord.song.animeTitle + ")";
         if (!(songKey in metaSongsMap)) {
           metaSongsMap[songKey] = 1;
         } else {
