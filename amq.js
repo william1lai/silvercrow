@@ -83,9 +83,9 @@ function logSongInfo() {
   var songType = $('#qpSongType').text();
   var song = new Song(songTitle, animeTitle, songArtist, songType);
 
-  var youtubeSearchURL = "https://www.youtube.com/results?search_query=" + animeTitle + "+" + songTitle;
-  $('#gcMessageContainer').append('<li><img class="backerBadge hide" src=""><span class="gcUserName">Silvercrow_Bot</span>'
-    + '<a href="' + youtubeSearchURL + '" target="_blank">' + songTitle + ' (' + animeTitle + ')</a></li>');
+  // var youtubeSearchURL = "https://www.youtube.com/results?search_query=" + animeTitle + "+" + songTitle;
+  // $('#gcMessageContainer').append('<li><img class="backerBadge hide" src=""><span class="gcUserName">Silvercrow_Bot</span>'
+  //   + '<a href="' + youtubeSearchURL + '" target="_blank">' + songTitle + ' (' + animeTitle + ')</a></li>');
 
   var songNum = $('#qpCurrentSongCount').text();
   var players = $('.qpAvatarContainer');
