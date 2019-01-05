@@ -170,15 +170,11 @@ function readLog() {
     console.log("Could not generate game log.")
   }
   request.onsuccess = function(event) {
-    var GAMES_LOGGED_LIMIT = 30;
-    var gamesLogged = 0;
+    // TODO: figure out how to limit in reverse chronological direction
     request.result.forEach(function(gameJSON) {
       var gr = Game.fromJSON(gameJSON);
       var grHTML = gr.toHTML();
-      if (gamesLogged < GAMES_LOGGED_LIMIT) {
-        logHTML = grHTML + "<br><br>" + logHTML;
-        gamesLogged += 1;
-      }
+      logHTML = grHTML + "<br><br>" + logHTML;
     });
 
     // perform analysis on the data
