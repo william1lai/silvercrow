@@ -2,6 +2,7 @@
 console.log('running silvercrow');
 var currentPlayers = [];
 var currentSongNum = -1;
+var isTrackingOn = true;
 var info;
 var game;
 var db;
@@ -13,6 +14,18 @@ logGame();
 function init() {
   fetchLogs();
   initDB();
+}
+
+function trackingOn() {
+  $('.qpSideContainer').find('.homura').remove();
+  $('.qpSideContainer').prepend('<div class="row homura" onclick="trackingOff()"><h3>Turn tracking off</h3></div>');
+  isTrackingOn = true;
+}
+
+function trackingOff() {
+  $('.qpSideContainer').find('.homura').remove();
+  $('.qpSideContainer').prepend('<div class="row homura" onclick="trackingOn()"><h3>Turn tracking on</h3></div>');
+  isTrackingOn = false;
 }
 
 function fetchLogs() {
@@ -60,11 +73,19 @@ function initDB() {
 }
 
 function logGame() {
+  if (isTrackingOn) {
+    trackingOn();
+  } else {
+    trackingOff();
+  }
+
   var target = document.querySelector('div#qpAnimeName');
   var observer = new MutationObserver(function(mutations) {
+    if (isTrackingOn) {
       logSongInfo();
       // $('#qpVoteSkip').click();
       //$('#qpVideosUserHidden').click();
+    }
   });
 
   var config = {
