@@ -18,13 +18,13 @@ function init() {
 
 function trackingOn() {
   $('.qpSideContainer').find('.homura').remove();
-  $('.qpSideContainer').prepend('<div class="row homura" onclick="trackingOff()"><h3>Turn tracking off</h3></div>');
+  $('.qpSideContainer').first().prepend('<div class="row homura" onclick="trackingOff()"><h3>Turn tracking off</h3></div>');
   isTrackingOn = true;
 }
 
 function trackingOff() {
   $('.qpSideContainer').find('.homura').remove();
-  $('.qpSideContainer').prepend('<div class="row homura" onclick="trackingOn()"><h3>Turn tracking on</h3></div>');
+  $('.qpSideContainer').first().prepend('<div class="row homura" onclick="trackingOn()"><h3>Turn tracking on</h3></div>');
   isTrackingOn = false;
 }
 
