@@ -18,13 +18,19 @@ function init() {
 
 function trackingOn() {
   $('.qpSideContainer').find('.homura').remove();
-  $('.qpSideContainer').first().prepend('<div class="row homura" onclick="trackingOff()"><h3>Turn tracking off</h3></div>');
+  $('.qpSideContainer').first().prepend('<div class="row homura"><h3>Turn tracking off</h3></div>');
+  $('.homura').click(function() {
+    trackingOff();
+  });
   isTrackingOn = true;
 }
 
 function trackingOff() {
   $('.qpSideContainer').find('.homura').remove();
-  $('.qpSideContainer').first().prepend('<div class="row homura" onclick="trackingOn()"><h3>Turn tracking on</h3></div>');
+  $('.qpSideContainer').first().prepend('<div class="row homura"><h3>Turn tracking on</h3></div>');
+  $('.homura').click(function() {
+    trackingOn();
+  });
   isTrackingOn = false;
 }
 
@@ -135,10 +141,12 @@ function logSongInfo() {
     if (hasCorrectAnswer) {
       correct.push(username);
     }
-    var hasInMalList = !$(player).find('.qpAvatarInMal').hasClass('hide');
+    var listStatus = $(player).find('.qpAvatarListStatus').text();
+    var hasInMalList = (listStatus === "C") || (listStatus === "W");
     if (hasInMalList) {
       inMalList.push(username);
     }
+    // we can also try using qpAvatarShowScore for more insights
   });
 
   var songRecord = new SongRecord(song, songNum, answers, correct, inMalList);
