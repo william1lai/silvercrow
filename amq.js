@@ -85,12 +85,12 @@ function logGame() {
     trackingOff();
   }
 
-  var target = document.querySelector('div#qpAnimeName');
+  var target = document.querySelector('div#qpAnimeNameHider');
   var observer = new MutationObserver(function(mutations) {
     if (isTrackingOn) {
       logSongInfo();
       // $('#qpVoteSkip').click();
-      //$('#qpVideosUserHidden').click();
+      // $('#qpVideosUserHidden').click();
     }
   });
 
@@ -104,22 +104,30 @@ function logGame() {
 }
 
 function logSongInfo() {
+  var didGuessingComplete = $('#qpAnimeNameHider').hasClass('hide');
+  // only record song if guessing turn just ended
+  if (!didGuessingComplete) {
+    return;
+  }
+
   var songTitle = $('#qpSongName').text();
   var animeTitle = $('#qpAnimeName').text();
   var songArtist = $('#qpSongArtist').text();
   var songType = $('#qpSongType').text();
   var song = new Song(songTitle, animeTitle, songArtist, songType);
+  console.log(song);
 
   // var youtubeSearchURL = "https://www.youtube.com/results?search_query=" + animeTitle + "+" + songTitle;
   // $('#gcMessageContainer').append('<li><img class="backerBadge hide" src=""><span class="gcUserName">Silvercrow_Bot</span>'
   //   + '<a href="' + youtubeSearchURL + '" target="_blank">' + songTitle + ' (' + animeTitle + ')</a></li>');
 
   var songNum = $('#qpCurrentSongCount').text();
-  var players = $('.qpAvatarContainer');
+  var players = $('.qpAvatarNameContainer.shadow');
   var nplayers = players.length;
   var gameplayers = [];
   players.each(function(index, player) {
-    var name = $(player).attr('id').split('-')[1];
+    var name = $(player).text().trim();
+    console.log(name);
     gameplayers.push(new Player(name));
   });
 
@@ -135,14 +143,15 @@ function logSongInfo() {
   var inMalList = [];
   players.each(function(index, player) {
     var username = gameplayers[index].username;
-    var answer = $(player).find('.qpAvatarAnswer').text().trim();
+    var answer = $(player).closest('.qpAvatarCenterContainer').find('.qpAvatarAnswer').text().trim();
     answers[username] = answer;
-    var hasCorrectAnswer = !$(player).find('.qpAvatarAnswer').parent().hasClass('wrongAnswer');
+    var hasCorrectAnswer = !$(player).closest('.qpAvatarCenterContainer').find('.qpAvatarAnswer').parent().hasClass('wrongAnswer');
     if (hasCorrectAnswer) {
       correct.push(username);
     }
-    var listStatus = $(player).find('.qpAvatarListStatus').text();
-    var hasInMalList = (listStatus === "C") || (listStatus === "W");
+    // var listStatus = $(player).closest('.qpAvatarCenterContainer').find('.qpAvatarListStatus').text();
+    // var hasInMalList = (listStatus === "C") || (listStatus === "W");
+    var hasInMalList = !($('.qpAvatarStatus.hide').length);
     if (hasInMalList) {
       inMalList.push(username);
     }
@@ -215,15 +224,19 @@ function readLog() {
     var playerIncorrectNoList = {};
     var playerCorrectNoList = {};
 
-    // Which songs have shown up the most in the last 30 days
+    // Which songs have shown up the most recently
     var metaSongsMap = {};
 
     request.result.forEach(function(gameJSON) {
       var gr = Game.fromJSON(gameJSON);
       var gameTime = new Date(gr.timestamp);
       var timeDiff = Date.now() - gameTime.getTime();
-      var THIRTY_DAYS_IN_SECS = 60 * 60 * 24 * 30;
-      var playedInLast30Days = timeDiff > THIRTY_DAYS_IN_SECS;
+      var NINETY_DAYS_IN_SECS = 60 * 60 * 24 * 90;
+      var playedInLast90Days = timeDiff > NINETY_DAYS_IN_SECS;
+
+      // if (!playedInLast90Days) {
+      //   return;
+      // }
 
       var songRecords = gr.songs;
       for (var i = 0; i < songRecords.length; i++) {
@@ -317,7 +330,7 @@ function readLog() {
       }
     )
 
-    var metaHTML = "<h2>Meta Songs (last 30 days)</h2>"
+    var metaHTML = "<h2>Meta Songs (last 90 days)</h2>"
     + "<table width=80%><tr>"
     + "<td width=20%><b>Count<b></td>"
     + "<td width=80%><b>Song<b></td>"
@@ -355,7 +368,7 @@ function updateStatOverlay(animeTitle, songTitle, songArtist, songType, players,
   for (var i = 0; i < players.length; i++) {
     correct.push(0);
     total.push(0);
-    names.push($(players[i]).attr('id').split('-')[1]);
+    names.push($(players[i]).text().trim());
   }
 
   // retrieve all records and iterate over them once to find all cases of this song
@@ -383,8 +396,8 @@ function updateStatOverlay(animeTitle, songTitle, songArtist, songType, players,
 
     // Inject historic score for song above each player's avatar
     for (var j = 0; j < players.length; j++) {
-      $(players[j]).find('.accel').remove();
-      $(players[j]).append("<div class=accel>" + correct[j] + ' / ' + total[j] + "</div>");
+      $(players[j]).closest('.qpAvatarCenterContainer').find('.accel').remove();
+      $(players[j]).closest('.qpAvatarCenterContainer').append("<div class=accel>" + correct[j] + ' / ' + total[j] + "</div>");
     }
   };  
 }
