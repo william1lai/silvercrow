@@ -2,7 +2,7 @@
 console.log('running silvercrow');
 var currentPlayers = [];
 var currentSongNum = -1;
-var isTrackingOn = true;
+var isAutoOn = true;
 var info;
 var game;
 var db;
@@ -16,22 +16,26 @@ function init() {
   initDB();
 }
 
-function trackingOn() {
+function autocompleteOn() {
   $('.qpSideContainer').find('.homura').remove();
-  $('.qpSideContainer').first().prepend('<div class="row homura"><h3>Turn tracking off</h3></div>');
+  $('.qpSideContainer').first().prepend('<div class="row homura"><h3>Auto is on</h3></div>');
   $('.homura').click(function() {
-    trackingOff();
+    autocompleteOff();
+    var autocompleteElement = $('div.awesomplete').find('ul.ps');
+    autocompleteElement.hide();
   });
-  isTrackingOn = true;
+  isAutoOn = true;
 }
 
-function trackingOff() {
+function autocompleteOff() {
   $('.qpSideContainer').find('.homura').remove();
-  $('.qpSideContainer').first().prepend('<div class="row homura"><h3>Turn tracking on</h3></div>');
+  $('.qpSideContainer').first().prepend('<div class="row homura"><h3>Auto is off</h3></div>');
   $('.homura').click(function() {
-    trackingOn();
+    autocompleteOn();
+    var autocompleteElement = $('div.awesomplete').find('ul.ps');
+    autocompleteElement.show();
   });
-  isTrackingOn = false;
+  isAutoOn = false;
 }
 
 function fetchLogs() {
@@ -79,15 +83,15 @@ function initDB() {
 }
 
 function logGame() {
-  if (isTrackingOn) {
-    trackingOn();
+  if (isAutoOn) {
+    autocompleteOn();
   } else {
-    trackingOff();
+    autocompleteOff();
   }
 
   var target = document.querySelector('div#qpAnimeNameHider');
   var observer = new MutationObserver(function(mutations) {
-    if (isTrackingOn) {
+    if (isAutoOn) {
       logSongInfo();
       // $('#qpVoteSkip').click();
       // $('#qpVideosUserHidden').click();
